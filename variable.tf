@@ -33,7 +33,6 @@ variable  "private-subnet-3-cidr" {
     type = string
 }
 
-
 variable  "private-subnet-4-cidr" {
     default = "10.0.5.0/24"
     description = "Private Subnet 4 CIDR Block"
