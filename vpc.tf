@@ -1,22 +1,22 @@
 # Create VPC
 # terraform aws create vpc
 resource "aws_vpc" "vpc" {
-  cidr_block              = var.vpc-cidr
-  instance_tenancy        = "default"
-  enable_dns_hostnames    = true
+  cidr_block           = var.vpc-cidr
+  instance_tenancy     = "default"
+  enable_dns_hostnames = true
 
-  tags      = {
-    Name    = "Test VPC"
+  tags = {
+    Name = "Test VPC"
   }
 }
 
 # Create Internet Gateway and Attach it to VPC
 # terraform aws create internet gateway
 resource "aws_internet_gateway" "internet-gateway" {
-  vpc_id    = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id
 
-  tags      = {
-    Name    = "Test IGW"
+  tags = {
+    Name = "Test IGW"
   }
 }
 
@@ -38,7 +38,7 @@ resource "aws_subnet" "public-subnet" {
 # Create Route Table and Add Public Route
 # terraform aws create route table
 resource "aws_route_table" "public-route-table" {
-  vpc_id       = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -55,8 +55,8 @@ resource "aws_route_table" "public-route-table" {
 resource "aws_route_table_association" "public-subnet-route-table-association" {
   count = 2
 
-  subnet_id           = aws_subnet.public-subnet[count.index].id
-  route_table_id      = aws_route_table.public-route-table.id
+  subnet_id      = aws_subnet.public-subnet[count.index].id
+  route_table_id = aws_route_table.public-route-table.id
 }
 
 # Create Private Subnet
@@ -64,13 +64,13 @@ resource "aws_route_table_association" "public-subnet-route-table-association" {
 resource "aws_subnet" "private-subnet" {
   count = 2
 
-  vpc_id                   = aws_vpc.vpc.id
-  cidr_block               = var.private-subnet-cidr[count.index]
-  availability_zone        = "us-east-1a"
-  map_public_ip_on_launch  = false
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.private-subnet-cidr[count.index]
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = false
 
-  tags      = {
-    Name    = "Private Subnet ${count.index} | App tier"
+  tags = {
+    Name = "Private Subnet ${count.index} | App tier"
   }
 }
 
@@ -79,9 +79,9 @@ resource "aws_subnet" "private-subnet" {
 resource "aws_eip" "eip-for-nat-gateway" {
   count = 2
 
-  vpc    = true
+  vpc = true
 
-  tags   = {
+  tags = {
     Name = "EIP ${count.index}"
   }
 }
@@ -94,7 +94,7 @@ resource "aws_nat_gateway" "nat-gateway" {
   allocation_id = aws_eip.eip-for-nat-gateway[count.index].id
   subnet_id     = aws_subnet.public-subnet[count.index].id
 
-  tags   = {
+  tags = {
     Name = "Public Subnet ${count.index}"
   }
 }
@@ -104,14 +104,14 @@ resource "aws_nat_gateway" "nat-gateway" {
 resource "aws_route_table" "private-route-table" {
   count = 2
 
-  vpc_id            = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
-    cidr_block      = "0.0.0.0/0"
-    nat_gateway_id  = aws_nat_gateway.nat-gateway[count.index].id
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gateway[count.index].id
   }
 
-  tags   = {
+  tags = {
     Name = "Private Route Table ${count.index}"
   }
 }
@@ -121,6 +121,6 @@ resource "aws_route_table" "private-route-table" {
 resource "aws_route_table_association" "private-subnet-route-table-association" {
   count = 2
 
-  subnet_id         = aws_subnet.private-subnet[count.index].id
-  route_table_id    = aws_route_table.private-route-table[count.index].id
+  subnet_id      = aws_subnet.private-subnet[count.index].id
+  route_table_id = aws_route_table.private-route-table[count.index].id
 }
